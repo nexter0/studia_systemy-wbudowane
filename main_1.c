@@ -25,60 +25,333 @@
 
 int main(void) {
     
+    // Inicjalizacja p?ytki
     unsigned char portValue = 1;
-    unsigned char mode = 0; // Port A access
-    AD1PCFG = 0xFFFF; // set to digital I/O (not analog)
-    TRISA = 0x0000; // set all port bits to be output
+    unsigned char mode = 0;
+    AD1PCFG = 0xFFFF;
+    TRISA = 0x0000;
     LATA = portValue;
     LCD_Initialize();
-    //while(1)
-    //{
-    //    if (BUTTON_IsPressed(BUTTON_S3))
-    //        portValue++;
-    //        
-    //    LATA = portValue; // write to port latch
-    //    __delay32(100000);
-    //}
 
-
+    // G?ówna p?tla programu
     while(1)
     {
+        // PROG 1 Licznik binarny 0 - 255
         if (mode == 0)
         {
-            portValue = 0;
+            // Wyczyszczenie i wy?wietlenie informacji na LCD
+            PRINT_ClearScreen();
+            PRINT_String("Program 1", 10);
+            
+            portValue = -1;
+            // P?tla podprogramu
             while(1)
             {
+                // Odliczanie w gór?
                 portValue++;
+                
+                // Opó?nienie
                 __delay32(1000000);
-                LATA = portValue; // write to port latch
+                
+                // Przekazanie na port
+                LATA = portValue;
+                
+                // Warunek zap?tlenia
+                if (portValue >= 255)
+                    portValue = -1;
 
+                // Obs?uga przycisku +
                 if (BUTTON_IsPressed(BUTTON_S6))
                 {
                     mode++;
                     break;
+                    if (mode > 8)
+                        mode = 0;
                 }
-                    
-            }
-        }
-        if (mode == 1)
-        {
-            portValue = 255;
-            while(1)
-            {
-                portValue--;
-                __delay32(1000000);
-                LATA = portValue; // write to port latch
-
-                if (BUTTON_IsPressed(BUTTON_S6))
+                // Obs?uga przycisku -
+                if (BUTTON_IsPressed(BUTTON_S3))
                 {
                     mode--;
                     break;
+                    if (mode < 0)
+                        mode = 8;
                 }
                     
             }
         }
-    }
+        
+        // PROG 2 Licznik binarny 255 - 0
+        if (mode == 1)
+        {
+            // Wyczyszczenie i wy?wietlenie informacji na LCD
+            PRINT_ClearScreen();
+            PRINT_String("Program 2", 10);
+            
+            portValue = 256;
+            // P?tla podprogramu
+            while(1)
+            {
+                // Odliczanie w dó?
+                portValue--;
+                
+                // Opó?nienie
+                __delay32(1000000);
+                
+                // Przekazanie na port
+                LATA = portValue;
+                
+                // Warunek zap?tlenia
+                if (portValue <= 0)
+                    portValue = 256;
+                
+                // Obs?uga przycisku +
+                if (BUTTON_IsPressed(BUTTON_S6))
+                {
+                    mode++;
+                    break;
+                    if (mode > 8)
+                        mode = 0;
+                }
+                // Obs?uga przycisku -
+                if (BUTTON_IsPressed(BUTTON_S3))
+                {
+                    mode--;
+                    break;
+                    if (mode < 0)
+                        mode = 8;
+                }
+                    
+            }
+        }
+        
+        // PROG 3 Licznik w kodzie Gray'a 0 - 255
+        if (mode == 2)
+        {
+            // Wyczyszczenie i wy?wietlenie informacji na LCD
+            PRINT_ClearScreen();
+            PRINT_String("Program 3", 10);
+            
+            portValue = -1;
+            // P?tla podprogramu
+            while(1)
+            {
+                // Odliczanie w gór?
+                portValue++;
+                
+                // Opó?nienie
+                __delay32(1000000);
+                
+                // Konwersja na kod Gray'a i przekazanie na port
+                int gray = portValue ^ (portValue >> 1);
+                LATA = gray;
+                
+                // Warunek zap?tlenia
+                if (portValue >= 255)
+                    portValue = -1;
 
+
+                // Obs?uga przycisku +
+                if (BUTTON_IsPressed(BUTTON_S6))
+                {
+                    mode++;
+                    break;
+                    if (mode > 8)
+                        mode = 0;
+                }
+                // Obs?uga przycisku -
+                if (BUTTON_IsPressed(BUTTON_S3))
+                {
+                    mode--;
+                    break;
+                    if (mode < 0)
+                        mode = 8;
+                }
+                    
+            }
+        }
+        
+        // PROG 4 Licznik w kodzie Gray'a 255 - 0
+        if (mode == 3)
+        {
+            PRINT_ClearScreen();
+            PRINT_String("Program 4", 10);
+            
+            portValue = 256;
+            // P?tla podprogramu
+            while(1)
+            {
+                // Odliczanie w dó?
+                portValue--;
+                
+                // Opó?nienie
+                __delay32(1000000);
+                
+                // Konwersja na kod Gray'a i przekazanie na port
+                int gray = portValue ^ (portValue >> 1);
+                LATA = gray;
+                
+                // Warunek zap?tlenia
+                if (portValue <= 0)
+                    portValue = 256;
+
+                
+                // Obs?uga przycisku +
+                if (BUTTON_IsPressed(BUTTON_S6))
+                {
+                    mode++;
+                    break;
+                    if (mode > 8)
+                        mode = 0;
+                }
+                // Obs?uga przycisku -
+                if (BUTTON_IsPressed(BUTTON_S3))
+                {
+                    mode--;
+                    break;
+                    if (mode < 0)
+                        mode = 8;
+                }
+            }
+        }
+        
+        // PROG 5 Licznik BCD 2x4 0 - 99
+        if (mode == 4)
+        {
+            PRINT_ClearScreen();
+            PRINT_String("Program 5", 10);
+            
+            portValue = -1;
+            // P?tla podprogramu
+            while(1)
+            {
+                // Odliczanie w gór?
+                portValue++;
+                
+                // Wyodr?bnienie dziesi?tek
+                unsigned char tens = (portValue / 10);
+                // Wyodr?bnienie jednostek
+                unsigned char units = (portValue % 10);
+                // Po??czenie dziesi?tki i jednostki w jedn? liczb? binarn?
+                unsigned char binary = (tens << 4) | units;
+                
+                // Opó?nienie
+                __delay32(1000000);
+                
+                // Przekazanie na port
+                LATA = binary;
+                
+                // Warunek zap?tlenia
+                if (portValue >= 99)
+                    portValue = -1;
+                
+                // Obs?uga przycisku +
+                if (BUTTON_IsPressed(BUTTON_S6))
+                {
+                    mode++;
+                    break;
+                    if (mode > 8)
+                        mode = 0;
+                }
+                // Obs?uga przycisku -
+                if (BUTTON_IsPressed(BUTTON_S3))
+                {
+                    mode--;
+                    break;
+                    if (mode < 0)
+                        mode = 8;
+                }
+            }
+        }
+        
+        // PROG 6 Licznik BCD 2x4 99 - 0
+        if (mode == 5)
+        {
+            PRINT_ClearScreen();
+            PRINT_String("Program 6", 10);
+            
+            portValue = 100;
+            // P?tla podprogramu
+            while(1)
+            {
+                // Odliczanie w gór?
+                portValue--;
+                
+                // Wyodr?bnienie dziesi?tek
+                unsigned char tens = (portValue / 10);
+                // Wyodr?bnienie jednostek
+                unsigned char units = (portValue % 10);
+                // Po??czenie dziesi?tki i jednostki w jedn? liczb? binarn?
+                unsigned char binary = (tens << 4) | units;
+                
+                // Opó?nienie
+                __delay32(1000000);
+                // Przekazanie na port
+                LATA = binary;
+                
+                // Warunek zap?tlenia
+                if (portValue <= 0)
+                    portValue = 100;
+                
+                // Obs?uga przycisku +
+                if (BUTTON_IsPressed(BUTTON_S6))
+                {
+                    mode++;
+                    break;
+                    if (mode > 8)
+                        mode = 0;
+                }
+                // Obs?uga przycisku -
+                if (BUTTON_IsPressed(BUTTON_S3))
+                {
+                    mode--;
+                    break;
+                    if (mode < 0)
+                        mode = 8;
+                }
+            }
+        }
+        
+        // PROG 7 3-bitowy w??yk
+        if (mode == 5)
+        {
+            PRINT_ClearScreen();
+            PRINT_String("Program 7", 10);
+            
+            portValue = 7;
+            // P?tla podprogramu
+            while(1)
+            {
+                // Odliczanie w gór?
+                portValue = 
+                
+                // Opó?nienie
+                __delay32(1000000);
+                // Przekazanie na port
+                LATA = binary;
+                
+                // Warunek zap?tlenia
+                if (portValue <= 0)
+                    portValue = 100;
+                
+                // Obs?uga przycisku +
+                if (BUTTON_IsPressed(BUTTON_S6))
+                {
+                    mode++;
+                    break;
+                    if (mode > 8)
+                        mode = 0;
+                }
+                // Obs?uga przycisku -
+                if (BUTTON_IsPressed(BUTTON_S3))
+                {
+                    mode--;
+                    break;
+                    if (mode < 0)
+                        mode = 8;
+                }
+            }
+        }
+    }
 
     return 0;
 }
