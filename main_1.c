@@ -23,6 +23,16 @@
 #include "print_lcd.h"
 #include "lcd.h"
 
+unsigned int lfsr_generate(unsigned int *state, unsigned int taps) {
+    unsigned int lsb = *state & 1; // get the least significant bit
+    *state >>= 1; // shift the register one position to the right
+
+    if (lsb) // if the least significant bit was set (1)
+        *state ^= taps; // perform XOR operation with the taps mask
+
+    return lsb;
+}
+
 int main(void) {
     
     // Inicjalizacja p?ytki
@@ -71,10 +81,8 @@ int main(void) {
                 // Obs?uga przycisku -
                 if (BUTTON_IsPressed(BUTTON_S3))
                 {
-                    mode--;
+                    mode = 8;
                     break;
-                    if (mode < 0)
-                        mode = 8;
                 }
                     
             }
@@ -312,26 +320,30 @@ int main(void) {
         }
         
         // PROG 7 3-bitowy w??yk
-        if (mode == 5)
+        if (mode == 6)
         {
             PRINT_ClearScreen();
             PRINT_String("Program 7", 10);
             
-            portValue = 7;
+            // Definicja kolejnych kroków wężyka jako liczby całkowitej
+            // określająca zapalone diody
+            int snake[] = {7, 14, 28, 56, 112, 224, 112, 56, 28, 14, 7};
+            int counter = 0;
             // P?tla podprogramu
             while(1)
             {
-                // Odliczanie w gór?
-                portValue = 
+                portValue = snake[counter];
+                
+                // Przekazanie na port
+                LATA = portValue;
                 
                 // Opó?nienie
                 __delay32(1000000);
-                // Przekazanie na port
-                LATA = binary;
                 
-                // Warunek zap?tlenia
-                if (portValue <= 0)
-                    portValue = 100;
+                // Zmiana na kolejny krok
+                counter++;
+                if (counter > 10)
+                    counter = 0;
                 
                 // Obs?uga przycisku +
                 if (BUTTON_IsPressed(BUTTON_S6))
@@ -351,6 +363,91 @@ int main(void) {
                 }
             }
         }
+        
+        // PROG 8 Kolejka
+        if (mode == 7)
+        {
+            PRINT_ClearScreen();
+            PRINT_String("Program 8", 10);
+            
+            int queueSteps[] = {0, 128, 192, 224, 240, 248, 252, 254, 255};
+            int counter;
+            int exitFlag = 0;
+            // P?tla podprogramu
+            while(!exitFlag)
+            {
+                int n;
+
+
+                for (counter = 0; counter < 8; counter++)
+                {
+                    for (int i = 0; i < 8 - counter; i++)
+                    {
+                        n = 1 << i;
+                        __delay32(1000000);
+                        portValue = queueSteps[counter] | n;
+                        LATA = portValue;
+                        
+                        // Obs?uga przycisku +
+                        if (BUTTON_IsPressed(BUTTON_S6))
+                        {
+                           mode++;
+                           exitFlag = 1;
+                           if (mode > 8)
+                               mode = 0;
+                        }
+                        // Obs?uga przycisku -
+                        if (BUTTON_IsPressed(BUTTON_S3))
+                        {
+                           mode--;
+                           exitFlag = 1;
+                           if (mode < 0)
+                               mode = 8;
+                        }
+                        if (exitFlag)
+                            break;
+                    }
+                    if (exitFlag)
+                        break;
+                }          
+            }
+        }
+        
+       // PROG 9 RNG
+        if (mode == 8)
+        {
+            PRINT_ClearScreen();
+            PRINT_String("Program 9", 10);
+            
+            int queueSteps[] = {0, 128, 192, 224, 240, 248, 252, 254, 255};
+            int counter;
+            // P?tla podprogramu
+            while(1)
+            {
+
+                lfsr_generate(&portValue, 0b111001);
+                LATA  = portValue;
+                
+                __delay32(1000000);
+
+                // Obs?uga przycisku +
+                if (BUTTON_IsPressed(BUTTON_S6))
+                {
+                    mode = 0;
+                    break;
+                }
+                // Obs?uga przycisku -
+                if (BUTTON_IsPressed(BUTTON_S3))
+                {
+                    mode--;
+                    break;
+                    if (mode < 0)
+                        mode = 8;
+                }
+            }
+        }
+        
+        
     }
 
     return 0;
