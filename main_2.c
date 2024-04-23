@@ -25,16 +25,6 @@
 #include "adc.h"
 #include <stdio.h>
 
-unsigned int lfsr_generate(unsigned int *state, unsigned int taps) {
-    unsigned int lsb = *state & 1; // get the least significant bit
-    *state >>= 1; // shift the register one position to the right
-
-    if (lsb) // if the least significant bit was set (1)
-        *state ^= taps; // perform XOR operation with the taps mask
-
-    return lsb;
-}
-
 int main(void) {
     
     // Inicjalizacja p?ytki
